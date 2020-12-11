@@ -111,6 +111,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     location = task.getResult();
                     updateMap();
                     Log.d("MAP", location.toString());
+
+                    // address service
+                    Intent intent = new Intent();
+                    AddressService.enqueueWork(MapsActivity.this, intent);
+
                 } else {
                     Log.e("MAP", "could not load location ", task.getException());
                 }
