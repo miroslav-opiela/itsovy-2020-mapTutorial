@@ -109,6 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onComplete(@NonNull Task<Location> task) {
                 if (task.isSuccessful()) {
                     location = task.getResult();
+                    updateMap();
                     Log.d("MAP", location.toString());
                 } else {
                     Log.e("MAP", "could not load location ", task.getException());
@@ -130,10 +131,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        //map.setTrafficEnabled(true);
+        updateMap();
+    }
+
+    /**
+     * na zaklade location nastavi mapu
+     */
+    private void updateMap() {
+        if (map == null) {
+            return;
+        }
+        if (location == null) {
+            LatLng sydney = new LatLng(-34, 151);
+            drawOnMap(sydney, "Default marker in Sydney", 5);
+        } else {
+            map.clear();
+            drawOnMap(new LatLng(location.getLatitude(), location.getLongitude()),
+                    "My location", 15);
+        }
+    }
+
+    /**
+     * vykresli marker a nastavi mapu
+     */
+    private void drawOnMap(LatLng position, String marker, int zoom) {
+        map.addMarker(new MarkerOptions().position(position).title(marker));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
     }
 }
