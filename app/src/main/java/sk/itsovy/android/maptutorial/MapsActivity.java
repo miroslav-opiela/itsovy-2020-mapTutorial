@@ -8,12 +8,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.CursorJoiner;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -33,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Location location;
+    private AddressResultReceiver resultReceiver;
 
     private static final int PERMISSION_CODE = 33;
     private static final String PERM = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -61,6 +66,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
+        resultReceiver = new AddressResultReceiver(new Handler());
+    }
+
+    private class AddressResultReceiver extends ResultReceiver {
+
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            String address = resultData.getString(AddressService.BUNDLE_KEY_ADDRESS);
+            if (address == null) {
+                address = "No address available";
+            }
+            Toast.makeText(MapsActivity.this, address, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void requestPermissions() {
@@ -115,6 +138,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // address service
                     Intent intent = new Intent();
                     intent.putExtra(AddressService.INTENT_KEY_LOCATION, location);
+                    intent.putExtra(AddressService.INTENT_KEY_RECEIVER, resultReceiver);
                     AddressService.enqueueWork(MapsActivity.this, intent);
 
                 } else {

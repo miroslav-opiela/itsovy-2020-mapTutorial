@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,7 +20,10 @@ import java.util.Locale;
 public class AddressService extends JobIntentService {
 
     private static final int JOB_ID = 4;
+    private static final int RESULT_CODE_OK = 3;
+    public static final String INTENT_KEY_RECEIVER = "receiver";
     public static final String INTENT_KEY_LOCATION = "loc";
+    public static final String BUNDLE_KEY_ADDRESS = "address";
 
     static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, AddressService.class, JOB_ID, work);
@@ -61,6 +66,15 @@ public class AddressService extends JobIntentService {
         log(address.getAddressLine(0));
 
         log("service job done.");
+
+        ResultReceiver resultReceiver = intent.getParcelableExtra(INTENT_KEY_RECEIVER);
+        if (resultReceiver == null) {
+            log("no result receiver");
+            return;
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString(BUNDLE_KEY_ADDRESS, address.getAddressLine(0));
+        resultReceiver.send(RESULT_CODE_OK, bundle);
     }
 
     private void log(String s) {
