@@ -114,6 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // address service
                     Intent intent = new Intent();
+                    intent.putExtra(AddressService.INTENT_KEY_LOCATION, location);
                     AddressService.enqueueWork(MapsActivity.this, intent);
 
                 } else {
